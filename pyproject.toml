@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "srsbotv2"
+version = "0.1.0"
+description = "Sadly, SRS uses a session system that asks for your login infromation every time. Because I need to use the system on a daily basis, I couldn't overlook the lengthy process of copying and pasting an email confirmation code. So, I decided to automate this."
+authors = ["HawkBrave <doganyigityilmazz@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+selenium = "^3.141.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

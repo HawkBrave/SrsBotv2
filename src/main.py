@@ -17,6 +17,7 @@ def main():
         sys.exit(1)
     except Exception as e:
         raise e
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 from selenium import webdriver
 from imaplib import IMAP4_SSL
 from time import sleep
+from datetime import datetime, timezone
 import email
 import re
 
@@ -15,14 +16,21 @@ class Bot:
 
 
     def run(self):
-        print("starting")
+        print("getting to the page..")
+        try:
+            self.driver.get("https://stars.bilkent.edu.tr")
+            self.driver.find_element_by_xpath("/html/body/div/div/div[1]/div/ul/li[3]/a").click()
+            self.driver.find_element_by_xpath("/html/body/div/div[1]/div[2]/div[1]/div/section/form/fieldset/div/div[1]/div[1]/div/div/input")\
+                    .send_keys(self.srsuser + "\t" + self.srspass + "\n")
 
-        self.driver.get("https://stars.bilkent.edu.tr")
-        self.driver.find_element_by_xpath("/html/body/div/div/div[1]/div/ul/li[3]/a").click()
-        self.driver.find_element_by_xpath("/html/body/div/div[1]/div[2]/div[1]/div/section/form/fieldset/div/div[1]/div[1]/div/div/input")\
-                .send_keys(self.srsuser + "\t" + self.srspass + "\n")
+        except Exception as e:
+            self.driver.close()
+            print("oops")
+            raise e
 
         sleep(2)
+        print("waiting for the mail server..")
+
         if self.mail_service == "gmail.com":
             self.mail_service = "imap." + self.mail_service
         elif self.mail_service == "ug.bilkent.edu.tr":
@@ -35,7 +43,9 @@ class Bot:
 
             m.select("Inbox")
             inbox_item_list = m.search(None, '(FROM "starsmsg@bilkent.edu.tr")')[1][0].split()
-            sleep(1)
+
+            sleep(2)
+            print("fetching code from given email address..")
             newest = inbox_item_list[-1]
             raw_mail = m.fetch(newest, '(BODY[TEXT])')[1][0][1].decode('utf-8')
 
@@ -45,4 +55,14 @@ class Bot:
         self.driver.find_element_by_xpath("/html/body/div/div[1]/div[2]/div[1]/div/section/form/fieldset/div/div[1]/div[1]/div/div/input")\
                 .send_keys(code + "\n")
 
-        sleep(60)
+        sleep(2)
+        print("getting session info from cookies..")
+        # print(self.driver.get_cookies())
+        expiry = self.driver.get_cookie('PHPSESSID')['expiry']
+        session_len = datetime.fromtimestamp(expiry, timezone.utc) - datetime.now(timezone.utc)
+
+        print("waiting for the session to die..")
+        sleep(int(session_len.total_seconds()))
+
+        print("session died.. reloging in..")
+        self.run()
